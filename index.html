@@ -1,1078 +1,172 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-<meta
-name="viewport"
-content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-/>
+  <title>Student Council Election</title>
 
-<title>Student Council Election</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 
-<script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="manifest.json">
 
-<style>
+  <style>
+    body{
+      background:#0f172a;
+      color:white;
+      font-family:sans-serif;
+    }
 
-:root{
---bg:#0f172a;
---glass:rgba(255,255,255,.08);
---border:rgba(255,255,255,.1);
-}
+    .glass{
+      background:rgba(255,255,255,.08);
+      backdrop-filter:blur(20px);
+      border:1px solid rgba(255,255,255,.1);
+    }
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-}
-
-body{
-font-family:sans-serif;
-background:var(--bg);
-color:white;
-overflow-x:hidden;
-}
-
-.glass{
-background:var(--glass);
-backdrop-filter:blur(12px);
-border:1px solid var(--border);
-}
-
-.fade{
-animation:fade .4s ease;
-}
-
-@keyframes fade{
-from{
-opacity:0;
-transform:translateY(10px);
-}
-to{
-opacity:1;
-transform:translateY(0);
-}
-}
-
-.sidebar-link{
-display:block;
-padding:14px;
-border-radius:16px;
-transition:.3s;
-}
-
-.sidebar-link:hover{
-background:rgba(255,255,255,.1);
-}
-
-.card{
-transition:.3s;
-}
-
-.card:hover{
-transform:translateY(-5px);
-}
-
-.bottom-safe{
-padding-bottom:env(safe-area-inset-bottom);
-}
-
-.toast{
-position:fixed;
-top:20px;
-right:20px;
-background:#22c55e;
-padding:12px 20px;
-border-radius:14px;
-z-index:9999;
-}
-
-.hidden-page{
-display:none;
-}
-
-</style>
-
+    .hidden{
+      display:none;
+    }
+  </style>
 </head>
-
 <body>
 
-<!-- MOBILE NAV -->
-<div
-class="fixed bottom-0 left-0 right-0 md:hidden
-glass border-t border-white/10 z-50 bottom-safe">
+<div id="app">
 
-<div class="grid grid-cols-5 text-center">
+  <!-- LOGIN -->
+  <section id="loginPage" class="min-h-screen flex items-center justify-center p-5">
 
-<button onclick="showPage('votePage')" class="p-4">
-🗳️
-</button>
+    <div class="glass p-8 rounded-3xl w-full max-w-md">
 
-<button onclick="showPage('resultPage')" class="p-4">
-📊
-</button>
+      <h1 class="text-3xl font-bold mb-6 text-center">
+        Student Council Election
+      </h1>
 
-<button onclick="showPage('candidatePage')" class="p-4">
-👤
-</button>
+      <input id="fullName"
+        class="w-full p-3 rounded-xl bg-slate-900 mb-3"
+        placeholder="ชื่อ-นามสกุล">
 
-<button onclick="showPage('guidePage')" class="p-4">
-📘
-</button>
+      <input id="classLevel"
+        class="w-full p-3 rounded-xl bg-slate-900 mb-3"
+        placeholder="ชั้น">
 
-<button onclick="adminLogin()" class="p-4">
-⚙️
-</button>
+      <input id="room"
+        class="w-full p-3 rounded-xl bg-slate-900 mb-3"
+        placeholder="ห้อง">
 
-</div>
+      <input id="studentId"
+        class="w-full p-3 rounded-xl bg-slate-900 mb-5"
+        placeholder="เลขประจำตัว (เว้นได้)">
 
-</div>
+      <button onclick="loginStudent()"
+        class="w-full p-3 rounded-xl bg-blue-500">
+        เข้าสู่ระบบ
+      </button>
 
-<div class="flex">
+    </div>
+  </section>
 
-<!-- SIDEBAR -->
-<div
-class="hidden md:flex
-fixed
-left-0
-top-0
-bottom-0
-w-72
-glass
-flex-col
-p-5">
+  <!-- VOTE PAGE -->
+  <section id="votePage" class="hidden p-5">
 
-<h1
-id="secretOwner"
-class="text-4xl font-bold cursor-pointer">
-🗳️ Election
-</h1>
+    <div class="flex justify-between items-center mb-6">
 
-<p class="opacity-70 mt-2">
-Student Council System
-</p>
+      <h2 class="text-2xl font-bold">
+        เลือกผู้สมัคร
+      </h2>
 
-<div class="space-y-3 mt-10">
+      <button onclick="openResults()"
+        class="bg-green-500 px-4 py-2 rounded-xl">
+        ผลคะแนน
+      </button>
 
-<button
-onclick="showPage('votePage')"
-class="sidebar-link glass w-full text-left">
-🗳️ หน้าโหวต
-</button>
+    </div>
 
-<button
-onclick="showPage('resultPage')"
-class="sidebar-link glass w-full text-left">
-📊 ผลคะแนน
-</button>
+    <div id="candidateContainer"
+      class="grid grid-cols-1 md:grid-cols-3 gap-5">
+    </div>
 
-<button
-onclick="showPage('candidatePage')"
-class="sidebar-link glass w-full text-left">
-👤 ผู้สมัคร
-</button>
+  </section>
 
-<button
-onclick="showPage('guidePage')"
-class="sidebar-link glass w-full text-left">
-📘 คู่มือ
-</button>
+  <!-- RESULT -->
+  <section id="resultPage" class="hidden p-5">
 
-<button
-onclick="adminLogin()"
-class="sidebar-link glass w-full text-left">
-⚙️ Admin
-</button>
+    <h2 class="text-3xl font-bold mb-5">
+      ผลคะแนน Real-time
+    </h2>
 
-</div>
+    <div id="resultContainer"></div>
 
-<div class="mt-auto">
+  </section>
 
-<button
-onclick="toggleDarkMode()"
-class="w-full bg-black p-3 rounded-2xl">
-🌙 Dark Mode
-</button>
+  <!-- ADMIN -->
+  <section id="adminPage" class="hidden p-5">
 
-</div>
+    <h2 class="text-3xl font-bold mb-6">
+      Admin Panel
+    </h2>
 
-</div>
+    <div class="glass p-5 rounded-2xl mb-5">
 
-<!-- CONTENT -->
-<div class="flex-1 md:ml-72 p-4 md:p-8">
+      <input id="candidateName"
+        class="w-full p-3 rounded-xl bg-slate-900 mb-3"
+        placeholder="ชื่อผู้สมัคร">
 
-<!-- HEADER -->
-<div class="glass rounded-3xl p-5">
+      <input id="candidateNumber"
+        class="w-full p-3 rounded-xl bg-slate-900 mb-3"
+        placeholder="หมายเลข">
 
-<div
-class="flex flex-col md:flex-row
-md:items-center
-md:justify-between gap-4">
+      <textarea id="candidatePolicy"
+        class="w-full p-3 rounded-xl bg-slate-900 mb-3"
+        placeholder="นโยบาย"></textarea>
 
-<div>
+      <button onclick="addCandidate()"
+        class="bg-blue-500 px-5 py-3 rounded-xl">
+        เพิ่มผู้สมัคร
+      </button>
 
-<h1
-id="mobileSecret"
-class="text-3xl md:text-5xl font-bold cursor-pointer">
-Student Council Election
-</h1>
+    </div>
 
-<p class="opacity-70 mt-2">
-ระบบเลือกตั้งสภานักเรียนออนไลน์
-</p>
+    <div id="adminCandidates"></div>
 
-</div>
+  </section>
 
-<div class="glass rounded-2xl px-4 py-3">
+  <!-- OWNER -->
+  <section id="ownerPage" class="hidden p-5">
 
-⏳ เหลือเวลาเลือกตั้ง:
-<span id="countdown">
-7 วัน
-</span>
+    <h2 class="text-3xl font-bold mb-6">
+      Owner Panel
+    </h2>
 
-</div>
+    <div class="grid gap-5">
+
+      <button onclick="toggleVoting()"
+        class="bg-green-500 p-4 rounded-xl">
+        เปิด / ปิด โหวต
+      </button>
+
+      <button onclick="toggleResult()"
+        class="bg-blue-500 p-4 rounded-xl">
+        เปิด / ปิด ผลคะแนน
+      </button>
+
+      <button onclick="toggleMaintenance()"
+        class="bg-yellow-500 p-4 rounded-xl">
+        Maintenance Mode
+      </button>
+
+      <button onclick="resetSystem()"
+        class="bg-red-500 p-4 rounded-xl">
+        รีเซ็ตระบบ
+      </button>
+
+    </div>
+
+  </section>
 
 </div>
 
-</div>
-
-<!-- LOGIN PAGE -->
-<div id="loginPage" class="mt-6 fade">
-
-<div class="glass rounded-3xl p-5">
-
-<h2 class="text-3xl font-bold mb-5">
-เข้าสู่ระบบนักเรียน
-</h2>
-
-<div class="grid md:grid-cols-2 gap-4">
-
-<input
-id="fullName"
-placeholder="ชื่อ-นามสกุล"
-class="bg-slate-800 p-4 rounded-2xl">
-
-<select
-id="classLevel"
-class="bg-slate-800 p-4 rounded-2xl">
-
-<option>ม.1</option>
-<option>ม.2</option>
-<option>ม.3</option>
-<option>ม.4</option>
-<option>ม.5</option>
-<option>ม.6</option>
-
-</select>
-
-<input
-id="room"
-placeholder="ห้อง"
-class="bg-slate-800 p-4 rounded-2xl">
-
-<input
-id="studentId"
-placeholder="เลขประจำตัวนักเรียน (ไม่ใส่ก็ได้)"
-class="bg-slate-800 p-4 rounded-2xl">
-
-</div>
-
-<button
-onclick="studentLogin()"
-class="w-full mt-5 bg-blue-500 p-4 rounded-2xl text-xl">
-เข้าสู่ระบบ
-</button>
-
-</div>
-
-</div>
-
-<!-- VOTE PAGE -->
-<div id="votePage" class="hidden-page mt-6 fade">
-
-<div
-class="grid
-grid-cols-1
-sm:grid-cols-2
-xl:grid-cols-3
-gap-5"
-id="candidateContainer">
-
-</div>
-
-</div>
-
-<!-- RESULT PAGE -->
-<div id="resultPage" class="hidden-page mt-6 fade">
-
-<div class="glass rounded-3xl p-5">
-
-<h2 class="text-3xl font-bold mb-5">
-📊 ผลคะแนนเรียลไทม์
-</h2>
-
-<div id="resultContainer"></div>
-
-</div>
-
-</div>
-
-<!-- CANDIDATE PAGE -->
-<div id="candidatePage" class="hidden-page mt-6 fade">
-
-<div class="glass rounded-3xl p-5">
-
-<h2 class="text-3xl font-bold mb-5">
-👤 รายละเอียดผู้สมัคร
-</h2>
-
-<div id="candidateDetail"></div>
-
-</div>
-
-</div>
-
-<!-- GUIDE PAGE -->
-<div id="guidePage" class="hidden-page mt-6 fade">
-
-<div class="glass rounded-3xl p-5">
-
-<h2 class="text-3xl font-bold mb-5">
-📘 คู่มือระบบ
-</h2>
-
-<div class="space-y-5">
-
-<div class="glass rounded-2xl p-4">
-<h3 class="text-2xl font-bold">
-นักเรียน
-</h3>
-
-<p class="opacity-70 mt-2">
-กรอกชื่อ ชั้น ห้อง แล้วเลือกผู้สมัครเพื่อโหวต
-</p>
-</div>
-
-<div class="glass rounded-2xl p-4">
-<h3 class="text-2xl font-bold">
-Admin
-</h3>
-
-<p class="opacity-70 mt-2">
-เข้าใช้งานด้วยรหัส admin1234
-</p>
-</div>
-
-<div class="glass rounded-2xl p-4">
-<h3 class="text-2xl font-bold">
-Owner
-</h3>
-
-<p class="opacity-70 mt-2">
-กดชื่อระบบแล้วใส่รหัส 1669
-</p>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- ADMIN PAGE -->
-<div id="adminPage" class="hidden-page mt-6 fade">
-
-<div class="glass rounded-3xl p-5">
-
-<h2 class="text-3xl font-bold mb-5">
-⚙️ Admin Panel
-</h2>
-
-<div class="grid md:grid-cols-2 gap-4">
-
-<input
-id="candidateName"
-placeholder="ชื่อผู้สมัคร"
-class="bg-slate-800 p-4 rounded-2xl">
-
-<input
-id="candidateNumber"
-placeholder="หมายเลข"
-class="bg-slate-800 p-4 rounded-2xl">
-
-<textarea
-id="candidatePolicy"
-placeholder="นโยบาย"
-class="bg-slate-800 p-4 rounded-2xl"></textarea>
-
-<input
-id="candidateImage"
-placeholder="ลิงก์รูปภาพ"
-class="bg-slate-800 p-4 rounded-2xl">
-
-</div>
-
-<button
-onclick="addCandidate()"
-class="w-full mt-5 bg-green-500 p-4 rounded-2xl">
-เพิ่มผู้สมัคร
-</button>
-
-</div>
-
-</div>
-
-<!-- OWNER PAGE -->
-<div id="ownerPage" class="hidden-page mt-6 fade">
-
-<div class="glass rounded-3xl p-5">
-
-<h2 class="text-3xl font-bold mb-5">
-👑 Owner Panel
-</h2>
-
-<div class="grid md:grid-cols-2 xl:grid-cols-4 gap-4">
-
-<button
-onclick="toggleVoting()"
-class="bg-blue-500 p-4 rounded-2xl">
-เปิด/ปิดโหวต
-</button>
-
-<button
-onclick="toggleResult()"
-class="bg-purple-500 p-4 rounded-2xl">
-เปิด/ปิดผลคะแนน
-</button>
-
-<button
-onclick="maintenanceMode()"
-class="bg-red-500 p-4 rounded-2xl">
-Maintenance Mode
-</button>
-
-<button
-onclick="resetVotes()"
-class="bg-orange-500 p-4 rounded-2xl">
-รีเซ็ตคะแนน
-</button>
-
-</div>
-
-<div class="grid md:grid-cols-2 xl:grid-cols-4 gap-4 mt-6">
-
-<div class="glass rounded-2xl p-5">
-<p>ผู้ใช้ทั้งหมด</p>
-<h1 id="totalUsers"
-class="text-4xl font-bold mt-2">
-0
-</h1>
-</div>
-
-<div class="glass rounded-2xl p-5">
-<p>ใช้สิทธิ์แล้ว</p>
-<h1 id="totalVotes"
-class="text-4xl font-bold mt-2">
-0
-</h1>
-</div>
-
-<div class="glass rounded-2xl p-5">
-<p>ผู้สมัคร</p>
-<h1 id="totalCandidates"
-class="text-4xl font-bold mt-2">
-0
-</h1>
-</div>
-
-<div class="glass rounded-2xl p-5">
-<p>เปอร์เซ็นต์</p>
-<h1 id="voteRate"
-class="text-4xl font-bold mt-2">
-0%
-</h1>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<script>
-
-const adminCode = "admin1234";
-const ownerCode = "1669";
-
-let votingOpen = true;
-let showResultEnabled = true;
-
-let candidates = [
-
-{
-id:1,
-name:"ณัฐวัตร",
-number:1,
-policy:"เพิ่มกิจกรรมโรงเรียน",
-history:"อดีตหัวหน้าห้อง",
-image:"https://picsum.photos/500?1",
-voteCount:0
-},
-
-{
-id:2,
-name:"อภิชาติ",
-number:2,
-policy:"พัฒนาโรงอาหาร",
-history:"ประธานชมรมกีฬา",
-image:"https://picsum.photos/500?2",
-voteCount:0
-},
-
-{
-id:3,
-name:"ศุภกร",
-number:3,
-policy:"เพิ่ม WiFi ฟรี",
-history:"สภานักเรียนเก่า",
-image:"https://picsum.photos/500?3",
-voteCount:0
-}
-
-];
-
-function toast(msg){
-
-const div = document.createElement("div");
-
-div.className="toast";
-
-div.innerText=msg;
-
-document.body.appendChild(div);
-
-setTimeout(()=>{
-div.remove();
-},3000);
-
-}
-
-function showPage(id){
-
-document.querySelectorAll(
-"#loginPage,#votePage,#resultPage,#candidatePage,#guidePage,#adminPage,#ownerPage"
-).forEach(page=>{
-
-page.style.display="none";
-
-});
-
-document.getElementById(id).style.display="block";
-
-}
-
-function studentLogin(){
-
-const fullName =
-document.getElementById("fullName").value;
-
-const room =
-document.getElementById("room").value;
-
-if(!fullName || !room){
-
-alert("กรอกข้อมูลให้ครบ");
-
-return;
-
-}
-
-localStorage.setItem("student",fullName);
-
-showPage("votePage");
-
-loadCandidates();
-
-toast("เข้าสู่ระบบสำเร็จ");
-
-}
-
-function loadCandidates(){
-
-const container =
-document.getElementById("candidateContainer");
-
-container.innerHTML="";
-
-candidates.forEach(c=>{
-
-container.innerHTML += `
-
-<div class="glass rounded-3xl p-4 card">
-
-<img
-src="${c.image}"
-class="w-full h-64 object-cover rounded-2xl cursor-pointer"
-onclick="openCandidate(${c.id})">
-
-<h2 class="text-2xl font-bold mt-4">
-เบอร์ ${c.number}
-</h2>
-
-<p class="mt-2 text-xl">
-${c.name}
-</p>
-
-<p class="opacity-70 mt-2">
-${c.policy}
-</p>
-
-<button
-onclick="vote(${c.id})"
-class="w-full mt-5 bg-green-500 p-3 rounded-2xl">
-โหวต
-</button>
-
-</div>
-
-`;
-
-});
-
-loadResults();
-
-updateAnalytics();
-
-}
-
-function vote(id){
-
-if(!votingOpen){
-
-alert("ปิดโหวตอยู่");
-
-return;
-
-}
-
-if(localStorage.getItem("hasVoted")){
-
-alert("คุณใช้สิทธิ์แล้ว");
-
-return;
-
-}
-
-const confirmVote =
-confirm("ยืนยันการโหวต ?");
-
-if(!confirmVote) return;
-
-const candidate =
-candidates.find(c=>c.id===id);
-
-candidate.voteCount++;
-
-localStorage.setItem("hasVoted","true");
-
-toast("โหวตสำเร็จ");
-
-loadResults();
-
-updateAnalytics();
-
-}
-
-function loadResults(){
-
-if(!showResultEnabled) return;
-
-const result =
-document.getElementById("resultContainer");
-
-result.innerHTML="";
-
-const sorted =
-[...candidates].sort((a,b)=>b.voteCount-a.voteCount);
-
-const total =
-sorted.reduce((a,b)=>a+b.voteCount,0);
-
-sorted.forEach((c,index)=>{
-
-const percent =
-total
-? ((c.voteCount/total)*100).toFixed(1)
-:0;
-
-result.innerHTML += `
-
-<div class="glass rounded-2xl p-4 mb-4">
-
-<div class="flex justify-between">
-
-<div>
-
-<h2 class="text-2xl font-bold">
-#${index+1} ${c.name}
-</h2>
-
-<p>
-${c.voteCount} คะแนน
-</p>
-
-</div>
-
-<div class="text-right">
-
-<p class="text-3xl font-bold">
-${percent}%
-</p>
-
-</div>
-
-</div>
-
-<div class="w-full bg-slate-700 h-4 rounded-full mt-4">
-
-<div
-style="width:${percent}%"
-class="bg-green-500 h-4 rounded-full">
-</div>
-
-</div>
-
-</div>
-
-`;
-
-});
-
-}
-
-function openCandidate(id){
-
-showPage("candidatePage");
-
-const c =
-candidates.find(x=>x.id===id);
-
-document.getElementById("candidateDetail")
-.innerHTML = `
-
-<div class="grid lg:grid-cols-2 gap-6">
-
-<img
-src="${c.image}"
-class="w-full rounded-3xl">
-
-<div>
-
-<h1 class="text-5xl font-bold">
-${c.name}
-</h1>
-
-<p class="text-2xl mt-3">
-หมายเลข ${c.number}
-</p>
-
-<div class="mt-6">
-
-<h2 class="text-2xl font-bold">
-นโยบาย
-</h2>
-
-<p class="opacity-70 mt-2">
-${c.policy}
-</p>
-
-</div>
-
-<div class="mt-6">
-
-<h2 class="text-2xl font-bold">
-ประวัติ
-</h2>
-
-<p class="opacity-70 mt-2">
-${c.history}
-</p>
-
-</div>
-
-<div class="mt-6">
-
-<h2 class="text-2xl font-bold">
-คะแนนปัจจุบัน
-</h2>
-
-<p class="text-3xl font-bold mt-2">
-${c.voteCount}
-</p>
-
-</div>
-
-<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
-
-<button
-onclick="shareFB()"
-class="bg-blue-600 p-3 rounded-2xl">
-Facebook
-</button>
-
-<button
-onclick="shareLine()"
-class="bg-green-500 p-3 rounded-2xl">
-LINE
-</button>
-
-<button
-onclick="shareX()"
-class="bg-black p-3 rounded-2xl">
-X
-</button>
-
-<button
-onclick="copyLink()"
-class="bg-purple-500 p-3 rounded-2xl">
-Copy
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-`;
-
-}
-
-function shareFB(){
-
-window.open(
-"https://facebook.com/sharer/sharer.php?u="+location.href
-);
-
-}
-
-function shareLine(){
-
-window.open(
-"https://social-plugins.line.me/lineit/share?url="+location.href
-);
-
-}
-
-function shareX(){
-
-window.open(
-"https://twitter.com/intent/tweet?url="+location.href
-);
-
-}
-
-function copyLink(){
-
-navigator.clipboard.writeText(location.href);
-
-toast("คัดลอกลิงก์แล้ว");
-
-}
-
-function adminLogin(){
-
-const code =
-prompt("กรอกรหัสผู้ดูแล");
-
-if(code===adminCode){
-
-showPage("adminPage");
-
-toast("เข้าสู่ระบบผู้ดูแล");
-
-}else{
-
-alert("รหัสไม่ถูกต้อง");
-
-}
-
-}
-
-function addCandidate(){
-
-const name =
-document.getElementById("candidateName").value;
-
-const number =
-document.getElementById("candidateNumber").value;
-
-const policy =
-document.getElementById("candidatePolicy").value;
-
-const image =
-document.getElementById("candidateImage").value;
-
-candidates.push({
-
-id:Date.now(),
-name,
-number,
-policy,
-history:"-",
-image,
-voteCount:0
-
-});
-
-toast("เพิ่มผู้สมัครสำเร็จ");
-
-loadCandidates();
-
-}
-
-document.getElementById("secretOwner")
-.onclick = ownerAccess;
-
-document.getElementById("mobileSecret")
-.onclick = ownerAccess;
-
-function ownerAccess(){
-
-const code =
-prompt("กรอกรหัสเจ้าของระบบ");
-
-if(code===ownerCode){
-
-showPage("ownerPage");
-
-toast("เข้าสู่ Owner");
-
-}else{
-
-alert("รหัสไม่ถูกต้อง");
-
-}
-
-}
-
-function toggleVoting(){
-
-votingOpen=!votingOpen;
-
-toast(
-votingOpen
-?"เปิดโหวตแล้ว"
-:"ปิดโหวตแล้ว"
-);
-
-}
-
-function toggleResult(){
-
-showResultEnabled=!showResultEnabled;
-
-toast(
-showResultEnabled
-?"เปิดผลคะแนน"
-:"ปิดผลคะแนน"
-);
-
-}
-
-function maintenanceMode(){
-
-document.body.innerHTML=`
-
-<div class="min-h-screen flex items-center justify-center p-6">
-
-<div class="glass rounded-3xl p-10 text-center">
-
-<h1 class="text-6xl">
-🛠️
-</h1>
-
-<h2 class="text-4xl font-bold mt-5">
-ระบบกำลังปรับปรุง
-</h2>
-
-</div>
-
-</div>
-
-`;
-
-}
-
-function resetVotes(){
-
-const c1 =
-confirm("ต้องการรีเซ็ตหรือไม่");
-
-if(!c1) return;
-
-const c2 =
-prompt("พิมพ์ RESET");
-
-if(c2 !== "RESET"){
-
-alert("ยกเลิก");
-
-return;
-
-}
-
-candidates.forEach(c=>{
-c.voteCount=0;
-});
-
-localStorage.removeItem("hasVoted");
-
-loadResults();
-
-updateAnalytics();
-
-toast("รีเซ็ตสำเร็จ");
-
-}
-
-function updateAnalytics(){
-
-document.getElementById("totalUsers")
-.innerText=1;
-
-const totalVotes =
-candidates.reduce((a,b)=>a+b.voteCount,0);
-
-document.getElementById("totalVotes")
-.innerText=totalVotes;
-
-document.getElementById("totalCandidates")
-.innerText=candidates.length;
-
-document.getElementById("voteRate")
-.innerText=
-totalVotes+"%";
-
-}
-
-function toggleDarkMode(){
-
-document.body.classList.toggle("bg-white");
-
-document.body.classList.toggle("text-black");
-
-toast("เปลี่ยนธีมแล้ว");
-
-}
-
-showPage("loginPage");
-
-loadCandidates();
-
-</script>
+<script type="module" src="firebase.js"></script>
+<script type="module" src="app.js"></script>
 
 </body>
 </html>
